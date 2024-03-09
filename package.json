@@ -3,22 +3,12 @@
 	"description": "A Phaser 3 project template that demonstrates Svelte communication and uses Vite for bundling.",
 	"version": "1.0.0",
 	"repository": {
-        "type": "git",
-        "url": "git+https://github.com/phaserjs/template-svelte.git"
-    },
-    "author": "Phaser Studio <support@phaser.io> (https://phaser.io/)",
-    "license": "MIT",
-    "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
-    "bugs": {
-        "url": "https://github.com/phaserjs/template-svelte/issues"
-    },
-    "homepage": "https://github.com/phaserjs/template-svelte#readme",
-    "keywords": [
-        "phaser",
-        "phaser3",
-        "svelte",
-        "vite"
-    ],
+		"type": "git",
+		"url": "git+https://github.com/GearKite/JPTC-game"
+	},
+	"author": "GearKite <emgh@em.id.lv>",
+	"license": "AGPL-3.0-or-later",
+	"licenseUrl": "https://www.gnu.org/licenses/agpl-3.0.txt",
 	"scripts": {
 		"dev": "vite --config vite/config.dev.mjs",
 		"build": "vite build --config vite/config.prod.mjs"
