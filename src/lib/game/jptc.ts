@@ -25,17 +25,20 @@ export class JPTCCube {
   }
 
   update(delta: number) {
-    let xCenter = this.body.x;
-    let yCenter = this.body.y;
-
-    let halfW = this.body.width / 2;
-    let halfH = this.body.height / 2;
-
-    if (xCenter + halfW >= this.game.camera.width || xCenter - halfW <= 0) {
+    // Bounce the cube off walls
+    if (this.body.x + this.body.width / 2 >= this.game.camera.width) {
       this.body.setVelocityX(this.body.getVelocity().x * -1);
+      this.body.setX(this.game.camera.width - this.body.width);
+    } else if (this.body.x - this.body.width / 2 <= 0) {
+      this.body.setVelocityX(this.body.getVelocity().x * -1);
+      this.body.setX(this.body.width);
     }
-    if (yCenter + halfH >= this.game.camera.height || yCenter - halfH <= 0) {
+    if (this.body.y + this.body.height / 2 >= this.game.camera.height) {
       this.body.setVelocityY(this.body.getVelocity().y * -1);
+      this.body.setY(this.game.camera.height - this.body.height);
+    } else if (this.body.y - this.body.height / 2 <= 0) {
+      this.body.setVelocityY(this.body.getVelocity().y * -1);
+      this.body.setY(this.body.height);
     }
   }
 }
