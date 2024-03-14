@@ -79,8 +79,7 @@ export class Snake {
         break;
     }
 
-    console.log("Shifting");
-
+    // Update tail
     Phaser.Actions.ShiftPosition(
       this.body.getChildren(),
       this.headPosition.x * this.game.gridCellSize,
@@ -88,6 +87,8 @@ export class Snake {
       1,
       this.tail
     );
+
+    this.checkIfFoodEaten();
 
     let bodyHit = Phaser.Actions.GetFirst(
       this.body.getChildren(),
@@ -101,7 +102,6 @@ export class Snake {
     );
 
     if (bodyHit) {
-      console.log("Snake body got hit!");
       this.isAlive = false;
     }
 
@@ -139,5 +139,16 @@ export class Snake {
     );
     tailRectangle.setOrigin(0);
     this.body.add(tailRectangle, true);
+  }
+
+  checkIfFoodEaten() {
+    let hit =
+      this.headPosition.x === this.game.food.gridX &&
+      this.headPosition.y === this.game.food.gridY;
+
+    if (hit) {
+      this.grow();
+      this.game.food.eatFood();
+    }
   }
 }
