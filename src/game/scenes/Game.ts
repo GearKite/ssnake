@@ -101,8 +101,12 @@ export class Game extends Scene {
       this.snake.faceUp();
     } else if (this.controls.down.isDown) {
       this.snake.faceDown();
-    } else if (this.controls.space.isDown) {
-      this.snake.grow();
+    }
+
+    if (this.controls.space.isDown) {
+      this.snake.speed = 16;
+    } else {
+      this.snake.speed = 8;
     }
 
     this.snake.update(delta);
