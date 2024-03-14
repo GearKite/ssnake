@@ -32,7 +32,12 @@ export class Game extends Scene {
     this.camera.setBackgroundColor(0x76abae);
 
     this.currentScore = 0;
-    this.hiScore = 0;
+
+    // Load saved hi-score
+    this.hiScore = parseInt(localStorage.getItem("hiscore")!);
+    if (Number.isNaN(this.hiScore)) {
+      this.hiScore = 0;
+    }
 
     this.controls = this.input.keyboard!.createCursorKeys();
 
@@ -75,7 +80,7 @@ export class Game extends Scene {
     // Add JPTC cube
     this.jptc = new JPTCCube(this);
 
-    this.updateScoreText();
+    this.updateScore();
 
     EventBus.emit("current-scene-ready", this);
   }
@@ -113,7 +118,11 @@ export class Game extends Scene {
     this.jptc.update(delta);
   }
 
-  updateScoreText() {
+  updateScore() {
+    if (this.currentScore > this.hiScore) {
+      this.hiScore = this.currentScore;
+      window.localStorage.setItem("hiscore", this.hiScore.toString());
+    }
     this.scoreText.text = `Score: ${this.currentScore}     Hi-Score: ${this.hiScore}`;
   }
 

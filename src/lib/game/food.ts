@@ -31,7 +31,7 @@ export class Food extends Phaser.GameObjects.Rectangle {
 
   eatFood() {
     this.game.currentScore += 1;
-    this.game.updateScoreText();
+    this.game.updateScore();
     this.moveFood();
   }
 }
