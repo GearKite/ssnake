@@ -28,17 +28,17 @@ export class JPTCCube {
     // Bounce the cube off walls
     if (this.body.x + this.body.width / 2 >= this.game.camera.width) {
       this.body.setVelocityX(this.body.getVelocity().x * -1);
-      this.body.setX(this.game.camera.width - this.body.width);
+      this.body.setX(this.game.camera.width - this.body.width / 2);
     } else if (this.body.x - this.body.width / 2 <= 0) {
       this.body.setVelocityX(this.body.getVelocity().x * -1);
-      this.body.setX(this.body.width);
+      this.body.setX(this.body.width / 2);
     }
     if (this.body.y + this.body.height / 2 >= this.game.camera.height) {
       this.body.setVelocityY(this.body.getVelocity().y * -1);
-      this.body.setY(this.game.camera.height - this.body.height);
+      this.body.setY(this.game.camera.height - this.body.height / 2);
     } else if (this.body.y - this.body.height / 2 <= 0) {
       this.body.setVelocityY(this.body.getVelocity().y * -1);
-      this.body.setY(this.body.height);
+      this.body.setY(this.body.height / 2);
     }
   }
 }
