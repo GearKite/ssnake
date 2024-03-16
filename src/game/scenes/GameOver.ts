@@ -5,6 +5,7 @@ export class GameOver extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
   background: Phaser.GameObjects.Image;
   gameOverText: Phaser.GameObjects.Text;
+  playButton: Phaser.GameObjects.Text;
 
   constructor() {
     super("GameOver");
@@ -40,6 +41,30 @@ export class GameOver extends Scene {
       })
       .setOrigin(0.5)
       .setDepth(100);
+
+    this.playButton = this.add
+      .text(512, 600, "Try again", {
+        fontFamily: "Arial Black",
+        fontSize: 38,
+        color: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 3,
+        align: "center",
+        backgroundColor: "#FFF767",
+        padding: { x: 8, y: 8 },
+      })
+      .setOrigin(0.5)
+      .setDepth(100)
+      .setInteractive()
+      .on("pointerdown", () => {
+        this.scene.start("Game");
+      })
+      .on("pointerover", () => {
+        this.playButton.setStyle({ backgroundColor: "#FFFFBF" });
+      })
+      .on("pointerout", () => {
+        this.playButton.setStyle({ backgroundColor: "#FFF767" });
+      });
 
     EventBus.emit("current-scene-ready", this);
   }
