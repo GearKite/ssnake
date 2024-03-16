@@ -5,12 +5,12 @@ export class Snake {
   headPosition: Phaser.Geom.Point;
   previousHeadPosition: Phaser.Geom.Point;
   head;
-  facing: "left" | "right" | "up" | "down" = "right";
+  currentFacing: "left" | "right" | "up" | "down" = "right";
+  previousFacing: typeof this.currentFacing;
   isAlive: boolean = true;
   body: Phaser.GameObjects.Group;
   tail: Phaser.Math.Vector2;
-  speed: number = 8; // cells per second
-  movedAfterTurn: boolean = true;
+  speed: number;
   timeUntilNextMove: number = 0;
 
   constructor(scene: Game, x: number, y: number) {
@@ -48,7 +48,8 @@ export class Snake {
       return;
     }
     this.timeUntilNextMove = 1000 / this.speed;
-    switch (this.facing) {
+
+    switch (this.currentFacing) {
       case "left":
         this.headPosition.x = Phaser.Math.Wrap(
           this.headPosition.x - 1,
@@ -79,6 +80,8 @@ export class Snake {
         break;
     }
 
+    this.previousFacing = this.currentFacing;
+
     // Update tail
     Phaser.Actions.ShiftPosition(
       this.body.getChildren(),
@@ -108,23 +111,23 @@ export class Snake {
     return bodyHit;
   }
   faceLeft() {
-    if (this.facing !== "right") {
-      this.facing = "left";
+    if (this.currentFacing !== "right" && this.previousFacing !== "right") {
+      this.currentFacing = "left";
     }
   }
   faceRight() {
-    if (this.facing !== "left") {
-      this.facing = "right";
+    if (this.currentFacing !== "left" && this.previousFacing !== "left") {
+      this.currentFacing = "right";
     }
   }
   faceUp() {
-    if (this.facing !== "down") {
-      this.facing = "up";
+    if (this.currentFacing !== "down" && this.previousFacing !== "down") {
+      this.currentFacing = "up";
     }
   }
   faceDown() {
-    if (this.facing !== "up") {
-      this.facing = "down";
+    if (this.currentFacing !== "up" && this.previousFacing !== "up") {
+      this.currentFacing = "down";
     }
   }
 
