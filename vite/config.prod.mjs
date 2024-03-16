@@ -8,7 +8,6 @@ process.stdout.write(`${line}\n${msg}\n${line}\n`);
 
 
 export default defineConfig({
-    base: './',
     plugins: [
         sveltekit(),
     ],

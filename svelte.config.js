@@ -10,7 +10,10 @@ const config = {
 		adapter: adapter({
 			precompress: false,
 			fallback: 'index.html'
-		})
+		}),
+		paths: {
+			base: process.env.NODE_ENV === "production" ? "/ssnake" : "",
+		},
 	}
 };
 
