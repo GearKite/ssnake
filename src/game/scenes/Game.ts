@@ -127,6 +127,6 @@ export class Game extends Scene {
   }
 
   changeScene() {
-    this.scene.start("GameOver");
+    this.scene.start("GameOver", { score: this.currentScore });
   }
 }
