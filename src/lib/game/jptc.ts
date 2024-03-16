@@ -22,6 +22,9 @@ export class JPTCCube {
 
     this.body.setDisplaySize(4 * game.gridCellSize, 4 * game.gridCellSize);
     this.body.setSize(4 * game.gridCellSize, 4 * game.gridCellSize);
+
+    // Move the cube in a random direction
+    this.body.setVelocity(Math.random() * 20 - 10, Math.random() * 20 - 10);
   }
 
   update(delta: number) {
