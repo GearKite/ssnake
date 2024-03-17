@@ -24,6 +24,9 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
       enableSleeping: true,
     },
   },
+  dom: {
+    createContainer: true,
+  },
 };
 
 const StartGame = (parent: string) => {
