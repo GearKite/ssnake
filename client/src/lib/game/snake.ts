@@ -55,6 +55,9 @@ export class Snake {
   }
 
   move(delta: number) {
+    if (!this.isAlive) {
+      return;
+    }
     if (this.timeUntilNextMove - delta > 0) {
       this.timeUntilNextMove = this.timeUntilNextMove - delta;
       return;
@@ -203,9 +206,11 @@ export class Snake {
   }
 
   async updateFromState(state: Player) {
-    this.currentFacing = state.facing;
+    if (!this.isAlive) {
+      return;
+    }
 
-    //this.move(1000);
+    this.currentFacing = state.facing;
 
     this.headPosition.setTo(state.position.x, state.position.y);
 
@@ -220,6 +225,15 @@ export class Snake {
     state.body.forEach((position, index) => {
       body[index].setX(position.x * this.game.gridCellSize);
       body[index].setY(position.y * this.game.gridCellSize);
+    });
+  }
+
+  destroy() {
+    // Destroy snake (on death)
+    this.isAlive = false;
+
+    this.body.getChildren().forEach((child) => {
+      this.body.killAndHide(child);
     });
   }
 }

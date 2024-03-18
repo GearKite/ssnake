@@ -99,15 +99,17 @@ export class Game extends Scene {
 
     this.listenForSocketEvents();
 
-    window.addEventListener("beforeunload", (e) => {
-      connection.socket.emit("player leave");
-    });
-
+    connection.socket.emit("player join");
+    this.sendUpdate();
     setInterval(() => {
       this.sendUpdate();
     }, 5000);
 
     EventBus.emit("current-scene-ready", this);
+
+    window.addEventListener("beforeunload", (e) => {
+      connection.socket.emit("player leave");
+    });
   }
 
   preload() {
@@ -155,6 +157,16 @@ export class Game extends Scene {
   }
 
   async listenForSocketEvents() {
+    // Send current state for new player
+    this.connection.socket.on("player join", () => {
+      this.sendUpdate();
+    });
+
+    // Update state after disconnect
+    this.connection.socket.on("connect", () => {
+      this.sendUpdate();
+    });
+
     this.connection.socket.on("player update", (player) => {
       console.debug("Received player update", player);
       if (!this.opponentSnakes.has(player.uuid)) {
@@ -168,10 +180,12 @@ export class Game extends Scene {
       console.debug("Received player leave", uuid);
 
       const snake = this.opponentSnakes.get(uuid);
-      snake!.isAlive = false;
-      snake!.body.getChildren().forEach((child) => {
-        child.destroy();
-      });
+
+      if (snake === undefined) {
+        return;
+      }
+
+      snake.destroy();
 
       this.opponents.delete(uuid);
       this.opponentSnakes.delete(uuid);

@@ -9,14 +9,12 @@ interface Food {
 
 export class Game {
   socket: Server;
-  players: Array<Player> = [];
+  players: Map<string, Player> = new Map();
   food: Array<Food> = [];
   socketIDToPlayerID: Map<string, string> = new Map();
 
   constructor(httpServer: httpServerT) {
     this.socket = new Server(httpServer);
-
-    this.startGameLoop();
 
     this.socket.on("connection", (client) => {
       console.log(
@@ -26,12 +24,13 @@ export class Game {
       client.emit("food", this.food);
 
       // Broadcast all player updates to every other player
-      client.on("player join", (player) => {
-        client.broadcast.emit("player join", player);
+      client.on("player join", () => {
+        client.broadcast.emit("player join");
       });
 
       client.on("player update", (player) => {
         this.socketIDToPlayerID.set(client.id, player.uuid);
+        this.players.set(player.uuid, player);
         client.broadcast.emit("player update", player);
       });
 
@@ -62,18 +61,5 @@ export class Game {
         console.log(`Client ${client.id} sent event: ${event}`);
       });
     });
-  }
-
-  async startGameLoop() {
-    const ticksPerSecond = 16;
-
-    // Repeatedly call the game loop
-    setInterval(() => {
-      this.loop();
-    }, 1000 / ticksPerSecond);
-  }
-
-  async loop() {
-    this.socket.emit("players", this.players);
   }
 }
