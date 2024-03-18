@@ -1,5 +1,6 @@
-import { GameObjects, Scene } from "phaser";
+import { Scene } from "phaser";
 import { EventBus } from "../EventBus";
+import { io } from "socket.io-client";
 import MainMenuDOM from "$lib/scenes/MainMenu.svelte";
 
 export class MainMenu extends Scene {
@@ -17,10 +18,15 @@ export class MainMenu extends Scene {
     const dom = this.add.dom(0, 0).setElement(domElement);
     dom.setOrigin(0, 0);
 
+    this.join_game();
+
     EventBus.emit("current-scene-ready", this);
   }
 
-  start_client() {
-    this.scene.start("Game", { peer: peer });
+  join_game() {
+    const socket = io("ws://localhost:3000");
+    socket.once("connect", () => {
+      this.scene.start("Game", { socket: socket });
+    });
   }
 }

@@ -1,20 +1,32 @@
 import type { Game } from "../../game/scenes/Game";
+import { SnakeFacing, type Player } from "$lib/game/player";
 
 export class Snake {
   game: Game;
   headPosition: Phaser.Geom.Point;
   previousHeadPosition: Phaser.Geom.Point;
   head;
-  currentFacing: "left" | "right" | "up" | "down" = "right";
-  previousFacing: typeof this.currentFacing;
+  currentFacing: SnakeFacing;
+  previousFacing: SnakeFacing;
   isAlive: boolean = true;
   body: Phaser.GameObjects.Group;
   tail: Phaser.Math.Vector2;
-  speed: number;
+  speed: number = 8;
   timeUntilNextMove: number = 0;
+  tailPositions: Array<Phaser.Geom.Point>;
+  puppet: boolean;
 
-  constructor(scene: Game, x: number, y: number) {
+  constructor(
+    scene: Game,
+    puppet: boolean,
+    x: number,
+    y: number,
+    facing?: SnakeFacing
+  ) {
     this.game = scene;
+    this.puppet = puppet;
+
+    this.currentFacing = facing || SnakeFacing.right;
 
     this.headPosition = new Phaser.Geom.Point(x, y);
     this.previousHeadPosition = structuredClone(this.headPosition);
@@ -50,28 +62,28 @@ export class Snake {
     this.timeUntilNextMove = 1000 / this.speed;
 
     switch (this.currentFacing) {
-      case "left":
+      case SnakeFacing.left:
         this.headPosition.x = Phaser.Math.Wrap(
           this.headPosition.x - 1,
           0,
           this.game.gridCellsX
         );
         break;
-      case "right":
+      case SnakeFacing.right:
         this.headPosition.x = Phaser.Math.Wrap(
           this.headPosition.x + 1,
           0,
           this.game.gridCellsX
         );
         break;
-      case "up":
+      case SnakeFacing.up:
         this.headPosition.y = Phaser.Math.Wrap(
           this.headPosition.y - 1,
           0,
           this.game.gridCellsY
         );
         break;
-      case "down":
+      case SnakeFacing.down:
         this.headPosition.y = Phaser.Math.Wrap(
           this.headPosition.y + 1,
           0,
@@ -80,7 +92,9 @@ export class Snake {
         break;
     }
 
-    this.previousFacing = this.currentFacing;
+    if (this.currentFacing !== this.previousFacing) {
+      this.previousFacing = this.currentFacing;
+    }
 
     // Update tail
     Phaser.Actions.ShiftPosition(
@@ -90,6 +104,10 @@ export class Snake {
       1,
       this.tail
     );
+
+    if (this.puppet) {
+      return true;
+    }
 
     this.checkIfFoodEaten();
 
@@ -111,37 +129,59 @@ export class Snake {
     return bodyHit;
   }
   faceLeft() {
-    if (this.currentFacing !== "right" && this.previousFacing !== "right") {
-      this.currentFacing = "left";
+    if (
+      this.currentFacing !== SnakeFacing.right &&
+      this.previousFacing !== SnakeFacing.right &&
+      this.currentFacing !== SnakeFacing.left
+    ) {
+      this.currentFacing = SnakeFacing.left;
+      this.sendUpdate();
     }
   }
   faceRight() {
-    if (this.currentFacing !== "left" && this.previousFacing !== "left") {
-      this.currentFacing = "right";
+    if (
+      this.currentFacing !== SnakeFacing.left &&
+      this.previousFacing !== SnakeFacing.left &&
+      this.currentFacing !== SnakeFacing.right
+    ) {
+      this.currentFacing = SnakeFacing.right;
+      this.sendUpdate();
     }
   }
   faceUp() {
-    if (this.currentFacing !== "down" && this.previousFacing !== "down") {
-      this.currentFacing = "up";
+    if (
+      this.currentFacing !== SnakeFacing.down &&
+      this.previousFacing !== SnakeFacing.down &&
+      this.currentFacing !== SnakeFacing.up
+    ) {
+      this.currentFacing = SnakeFacing.up;
+      this.sendUpdate();
     }
   }
   faceDown() {
-    if (this.currentFacing !== "up" && this.previousFacing !== "up") {
-      this.currentFacing = "down";
+    if (
+      this.currentFacing !== SnakeFacing.up &&
+      this.previousFacing !== SnakeFacing.up &&
+      this.currentFacing !== SnakeFacing.down
+    ) {
+      this.currentFacing = SnakeFacing.down;
+      this.sendUpdate();
     }
   }
 
-  grow() {
+  grow(x?: number, y?: number) {
     let tailRectangle = new Phaser.GameObjects.Rectangle(
       this.game,
-      this.tail.x * this.game.gridCellSize,
-      this.tail.y * this.game.gridCellSize + this.game.scoreBarHeight,
+      x || this.tail.x,
+      y || this.tail.y,
       this.game.gridCellSize,
       this.game.gridCellSize,
       0xebc49f
     );
     tailRectangle.setOrigin(0);
     this.body.add(tailRectangle, true);
+
+    this.sendUpdate();
   }
 
   checkIfFoodEaten() {
@@ -153,5 +193,33 @@ export class Snake {
       this.grow();
       this.game.food.eatFood();
     }
+  }
+
+  sendUpdate() {
+    if (this.puppet) {
+      return;
+    }
+    this.game.sendUpdate();
+  }
+
+  async updateFromState(state: Player) {
+    this.currentFacing = state.facing;
+
+    //this.move(1000);
+
+    this.headPosition.setTo(state.position.x, state.position.y);
+
+    state.body.forEach((position, index) => {
+      if (index >= this.body.getLength()) {
+        this.grow(position.x, position.y);
+      }
+    });
+
+    const body: Array<any> = this.body.getChildren();
+
+    state.body.forEach((position, index) => {
+      body[index].setX(position.x * this.game.gridCellSize);
+      body[index].setY(position.y * this.game.gridCellSize);
+    });
   }
 }
