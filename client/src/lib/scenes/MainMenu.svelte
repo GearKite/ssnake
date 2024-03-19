@@ -3,18 +3,28 @@
 
   export let joinGame: Function;
 
-  let defaultURI = window.location.host;
+  let serverURI: string;
+  let playerName: string;
 
-  // GitHub pages won't have the server
-  if (defaultURI.endsWith("github.io")) {
-    defaultURI = "ssnake.em.id.lv";
+  if (window.localStorage.getItem("server") === null) {
+    let defaultURI = window.location.host;
+
+    // GitHub pages won't have the server
+    if (defaultURI.endsWith("github.io")) {
+      defaultURI = "ssnake.em.id.lv";
+    }
+    serverURI = defaultURI;
+    window.localStorage.setItem("server", serverURI);
+  } else {
+    serverURI = window.localStorage.getItem("server")!;
   }
 
-  export let serverURI: string =
-    window.localStorage.getItem("server") || defaultURI;
-
-  let playerName: string =
-    window.localStorage.getItem("playerName") || "player";
+  if (window.localStorage.getItem("playerName") === null) {
+    playerName = "player";
+    window.localStorage.setItem("playerName", playerName);
+  } else {
+    playerName = window.localStorage.getItem("playerName")!;
+  }
 </script>
 
 <div class="center">
