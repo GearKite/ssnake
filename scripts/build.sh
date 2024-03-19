@@ -11,4 +11,5 @@ cd server
 npm run build
 
 # Copy site to server
+rm -rf public
 cp -r ../client/build public
