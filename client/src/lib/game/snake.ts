@@ -16,6 +16,7 @@ export class Snake {
   tailPositions: Array<Phaser.Geom.Point>;
   puppet: boolean;
   name: string;
+  namePlate: Phaser.GameObjects.Text;
 
   constructor(
     scene: Game,
@@ -48,6 +49,16 @@ export class Snake {
     this.head.setOrigin(0);
 
     this.tail = new Phaser.Math.Vector2(x, y);
+
+    this.namePlate = scene.add.text(headRectangle.x, headRectangle.y, name, {
+      fontFamily: "Arial Black",
+      fontSize: 16,
+      color: "#00dd00",
+      stroke: "#000000",
+      strokeThickness: 1,
+      align: "center",
+    });
+    this.namePlate.setOrigin(0);
   }
 
   update(delta: number) {
@@ -102,14 +113,16 @@ export class Snake {
       this.previousFacing = this.currentFacing;
     }
 
+    const x = this.headPosition.x * this.game.gridCellSize;
+    const y =
+      this.headPosition.y * this.game.gridCellSize + this.game.scoreBarHeight;
+
     // Update tail
-    Phaser.Actions.ShiftPosition(
-      this.body.getChildren(),
-      this.headPosition.x * this.game.gridCellSize,
-      this.headPosition.y * this.game.gridCellSize + this.game.scoreBarHeight,
-      1,
-      this.tail
-    );
+    Phaser.Actions.ShiftPosition(this.body.getChildren(), x, y, 1, this.tail);
+
+    if (this.currentFacing === SnakeFacing.down)
+      this.namePlate.setPosition(x, y + 16);
+    else this.namePlate.setPosition(x, y - 20);
 
     if (this.puppet) {
       return true;

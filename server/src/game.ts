@@ -30,7 +30,7 @@ export class Game {
         client.emit("food", Array.from(this.food.values()));
       });
 
-      client.on("player update", (player) => {
+      client.on("player update", (player: Player) => {
         this.socketIDToPlayerID.set(client.id, player.uuid);
         this.players.set(player.uuid, player);
         client.broadcast.emit("player update", player);
@@ -74,7 +74,7 @@ export class Game {
       });
 
       client.onAny((event) => {
-        console.log(`Client ${client.id} sent event: ${event}`);
+        console.debug(`Client ${client.id} sent event: ${event}`);
       });
     });
   }
@@ -90,8 +90,6 @@ export class Game {
       gridX: Math.floor(Math.random() * (this.boardSizeX - 1)),
       gridY: Math.floor(Math.random() * (this.boardSizeY - 1)),
     });
-
-    console.log("food:", this.food);
 
     this.socket.emit("food", Array.from(this.food.values()));
 
