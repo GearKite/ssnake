@@ -52,7 +52,7 @@ export class Snake {
 
     this.namePlate = scene.add.text(headRectangle.x, headRectangle.y, name, {
       fontFamily: "Arial Black",
-      fontSize: 16,
+      fontSize: 14,
       color: "#00dd00",
       stroke: "#000000",
       strokeThickness: 1,
@@ -120,9 +120,14 @@ export class Snake {
     // Update tail
     Phaser.Actions.ShiftPosition(this.body.getChildren(), x, y, 1, this.tail);
 
-    if (this.currentFacing === SnakeFacing.down)
-      this.namePlate.setPosition(x, y + 16);
-    else this.namePlate.setPosition(x, y - 20);
+    if (this.currentFacing === SnakeFacing.left)
+      this.namePlate.setPosition(x - this.namePlate.width / 2, y - 18);
+    else if (this.currentFacing === SnakeFacing.right)
+      this.namePlate.setPosition(x - this.namePlate.width / 2 + 16, y - 18);
+    else if (this.currentFacing === SnakeFacing.up)
+      this.namePlate.setPosition(x - this.namePlate.width / 2, y - 18);
+    else if (this.currentFacing === SnakeFacing.down)
+      this.namePlate.setPosition(x - this.namePlate.width / 2, y + 14);
 
     if (this.puppet) {
       return true;
@@ -272,5 +277,7 @@ export class Snake {
     this.body.getChildren().forEach((child) => {
       this.body.killAndHide(child);
     });
+
+    this.namePlate.destroy();
   }
 }
