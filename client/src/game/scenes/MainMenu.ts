@@ -13,18 +13,26 @@ export class MainMenu extends Scene {
 
     // Load main menu HTML
     let domElement = document.createElement("div");
-    new MainMenuDOM({ target: domElement });
+    new MainMenuDOM({
+      target: domElement,
+      props: {
+        joinGame: (server: string) => {
+          this.joinGame(server);
+        },
+      },
+    });
 
     const dom = this.add.dom(0, 0).setElement(domElement);
     dom.setOrigin(0, 0);
 
-    this.join_game();
-
     EventBus.emit("current-scene-ready", this);
   }
 
-  join_game() {
-    const socket = io();
+  joinGame(server: string) {
+    const socket = io(server, {
+      reconnectionAttempts: 5,
+      reconnectionDelayMax: 10000,
+    });
     socket.once("connect", () => {
       this.scene.start("Game", { socket: socket });
     });
