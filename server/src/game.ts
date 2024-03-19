@@ -66,6 +66,8 @@ export class Game {
           server.spawnFood(position.x, position.y, "player", player.color);
         });
 
+        client.broadcast.emit("food", Array.from(this.food.values()));
+
         server.players.delete(uuid);
 
         server.socketIDToPlayerID.delete(client.id);
