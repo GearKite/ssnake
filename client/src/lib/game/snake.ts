@@ -17,6 +17,7 @@ export class Snake {
   puppet: boolean;
   name: string;
   namePlate: Phaser.GameObjects.Text;
+  color: number;
 
   constructor(
     scene: Game,
@@ -24,11 +25,13 @@ export class Snake {
     x: number,
     y: number,
     name: string,
+    color: number,
     facing?: SnakeFacing
   ) {
     this.game = scene;
     this.puppet = puppet;
     this.name = name;
+    this.color = color;
 
     this.currentFacing = facing || SnakeFacing.right;
 
@@ -43,7 +46,7 @@ export class Snake {
       y * this.game.gridCellSize,
       this.game.gridCellSize,
       this.game.gridCellSize,
-      0xd37676
+      this.color
     );
     this.head = this.body.add(headRectangle, true);
     this.head.setOrigin(0);
@@ -53,7 +56,7 @@ export class Snake {
     this.namePlate = scene.add.text(headRectangle.x, headRectangle.y, name, {
       fontFamily: "Arial Black",
       fontSize: 14,
-      color: puppet ? "#dd0000" : "#00dd00",
+      color: "#" + this.color.toString(16),
       strokeThickness: 0,
       align: "center",
     });
@@ -183,7 +186,7 @@ export class Snake {
       y || this.tail.y,
       this.game.gridCellSize,
       this.game.gridCellSize,
-      0xebc49f
+      this.color
     );
     tailRectangle.setOrigin(0);
     this.body.add(tailRectangle, true);
@@ -252,6 +255,7 @@ export class Snake {
     }
 
     this.currentFacing = state.facing;
+    this.color = state.color;
 
     this.headPosition.setTo(state.position.x, state.position.y);
 

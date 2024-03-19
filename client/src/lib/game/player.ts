@@ -17,4 +17,5 @@ export interface Player {
   score: number;
   body: Array<Position>;
   facing: SnakeFacing;
+  color: number;
 }

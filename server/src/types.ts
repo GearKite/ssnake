@@ -9,6 +9,8 @@ export interface Player {
   position: Position;
   score: number;
   body: Array<Position>;
+  facing: string;
+  color: number;
 }
 
 export interface FoodLocation {

@@ -6,6 +6,7 @@ import { JPTCCube } from "$lib/game/jptc";
 import { type Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { type Player, type Position } from "$lib/game/player";
+import randomColor from "randomcolor";
 
 export class Game extends Scene {
   socket: Socket;
@@ -96,7 +97,8 @@ export class Game extends Scene {
       false,
       this.gridCellsX / 2,
       this.gridCellsY / 2,
-      data.playerName
+      data.playerName,
+      parseInt(randomColor({ luminosity: "light" }).replace("#", ""), 16)
     );
 
     // Add JPTC cube
@@ -241,6 +243,7 @@ export class Game extends Scene {
         player.position.x,
         player.position.y,
         player.username,
+        player.color,
         player.facing
       )
     );
@@ -262,6 +265,7 @@ export class Game extends Scene {
       position: this.snake.headPosition,
       facing: this.snake.currentFacing,
       body: body,
+      color: this.snake.color,
     };
 
     return player;
