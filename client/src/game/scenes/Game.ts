@@ -95,8 +95,8 @@ export class Game extends Scene {
     this.snake = new Snake(
       this,
       false,
-      this.gridCellsX / 2,
-      this.gridCellsY / 2,
+      Math.floor(Math.random() * this.gridCellsX),
+      Math.floor(Math.random() * this.gridCellsY),
       data.playerName,
       parseInt(randomColor({ luminosity: "light" }).replace("#", ""), 16)
     );
