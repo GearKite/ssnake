@@ -54,7 +54,7 @@ export class Snake {
     this.move(delta);
   }
 
-  move(delta: number) {
+  async move(delta: number) {
     if (!this.isAlive) {
       return;
     }
@@ -113,23 +113,7 @@ export class Snake {
     }
 
     this.checkIfFoodEaten();
-
-    let bodyHit = Phaser.Actions.GetFirst(
-      this.body.getChildren(),
-      {
-        x: this.headPosition.x * this.game.gridCellSize,
-        y:
-          this.headPosition.y * this.game.gridCellSize +
-          this.game.scoreBarHeight,
-      },
-      1
-    );
-
-    if (bodyHit) {
-      this.isAlive = false;
-    }
-
-    return bodyHit;
+    return await this.checkIfSnakeHit();
   }
   faceLeft() {
     if (
@@ -187,7 +171,7 @@ export class Snake {
     this.sendUpdate();
   }
 
-  checkIfFoodEaten() {
+  async checkIfFoodEaten() {
     this.game.food.forEach((food, uuid) => {
       let hit =
         this.headPosition.x === food.gridX &&
@@ -198,6 +182,36 @@ export class Snake {
         food.eatFood();
       }
     });
+  }
+
+  async checkIfSnakeHit() {
+    let snakes = Array.from(this.game.opponentSnakes.values());
+    //snakes.push(this);
+
+    const x = this.headPosition.x * this.game.gridCellSize;
+    const y =
+      this.headPosition.y * this.game.gridCellSize + this.game.scoreBarHeight;
+
+    let hitOpponent = !snakes.every((snake) => {
+      return snake.body.getChildren().every((child: any) => {
+        return !(x === child.x && y === child.y);
+      });
+    });
+
+    let hitSelf = !this.body
+      .getChildren()
+      .every((child: any, index: number) => {
+        // Don't check collision with our head
+        if (index === 0) {
+          return true;
+        }
+        return !(x === child.x && y === child.y);
+      });
+
+    if (hitOpponent || hitSelf) {
+      this.isAlive = false;
+    }
+    return hitOpponent || hitSelf;
   }
 
   sendUpdate() {
