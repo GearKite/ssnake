@@ -16,8 +16,8 @@ export class MainMenu extends Scene {
     new MainMenuDOM({
       target: domElement,
       props: {
-        joinGame: (server: string) => {
-          this.joinGame(server);
+        joinGame: (server: string, playerName: string) => {
+          this.joinGame(server, playerName);
         },
       },
     });
@@ -28,13 +28,13 @@ export class MainMenu extends Scene {
     EventBus.emit("current-scene-ready", this);
   }
 
-  joinGame(server: string) {
+  joinGame(server: string, playerName: string) {
     const socket = io(server, {
       reconnectionAttempts: 5,
       reconnectionDelayMax: 10000,
     });
     socket.once("connect", () => {
-      this.scene.start("Game", { socket: socket });
+      this.scene.start("Game", { socket: socket, playerName: playerName });
     });
   }
 }

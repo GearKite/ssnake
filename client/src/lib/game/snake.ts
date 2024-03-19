@@ -15,16 +15,19 @@ export class Snake {
   timeUntilNextMove: number = 0;
   tailPositions: Array<Phaser.Geom.Point>;
   puppet: boolean;
+  name: string;
 
   constructor(
     scene: Game,
     puppet: boolean,
     x: number,
     y: number,
+    name: string,
     facing?: SnakeFacing
   ) {
     this.game = scene;
     this.puppet = puppet;
+    this.name = name;
 
     this.currentFacing = facing || SnakeFacing.right;
 
@@ -193,6 +196,7 @@ export class Snake {
       this.headPosition.y * this.game.gridCellSize + this.game.scoreBarHeight;
 
     let hitOpponent = !snakes.every((snake) => {
+      this.game.diedBy = snake.name;
       return snake.body.getChildren().every((child: any) => {
         return !(x === child.x && y === child.y);
       });
@@ -207,6 +211,10 @@ export class Snake {
         }
         return !(x === child.x && y === child.y);
       });
+
+    if (hitSelf) {
+      this.game.diedBy = this.name;
+    }
 
     if (hitOpponent || hitSelf) {
       this.isAlive = false;

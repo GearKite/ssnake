@@ -45,7 +45,7 @@ export class Food extends Phaser.GameObjects.Rectangle implements FoodLocation {
   }
 
   eatFood() {
-    this.game.connection.socket.emit("food eat", this.uuid);
+    this.game.socket.emit("food eat", this.uuid);
     this.game.currentScore += 1;
     this.game.updateScore();
     this.destroy(true);

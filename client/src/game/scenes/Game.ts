@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { type Player, type Position } from "$lib/game/player";
 
 export class Game extends Scene {
-  connection: { socket: Socket };
+  socket: Socket;
   uuid: string = uuidv4();
 
   camera: Phaser.Cameras.Scene2D.Camera;
@@ -16,6 +16,7 @@ export class Game extends Scene {
 
   currentScore: number;
   hiScore: number;
+  diedBy: string;
 
   snake: Snake;
   food: Map<string, Food>;
@@ -37,8 +38,8 @@ export class Game extends Scene {
     super("Game");
   }
 
-  create(connection: typeof this.connection) {
-    this.connection = connection;
+  create(data: { socket: Socket; playerName: string }) {
+    this.socket = data.socket;
 
     this.camera = this.cameras.main;
     this.camera.zoom = 1;
@@ -94,7 +95,8 @@ export class Game extends Scene {
       this,
       false,
       this.gridCellsX / 2,
-      this.gridCellsY / 2
+      this.gridCellsY / 2,
+      data.playerName
     );
 
     // Add JPTC cube
@@ -104,7 +106,7 @@ export class Game extends Scene {
 
     this.listenForSocketEvents();
 
-    connection.socket.emit("player join");
+    this.socket.emit("player join");
     this.sendUpdate();
 
     this.updateInterval = setInterval(() => {
@@ -114,14 +116,14 @@ export class Game extends Scene {
     EventBus.emit("current-scene-ready", this);
 
     window.addEventListener("beforeunload", (e) => {
-      connection.socket.emit("player leave");
+      this.socket.emit("player leave");
     });
 
     this.events.once("shutdown", () => {
       clearInterval(this.updateInterval);
-      this.connection.socket.emit("player leave");
-      this.connection.socket.disconnect();
-      this.connection.socket.off();
+      this.socket.emit("player leave");
+      this.socket.disconnect();
+      this.socket.off();
     });
   }
 
@@ -165,21 +167,24 @@ export class Game extends Scene {
   }
 
   changeScene() {
-    this.scene.start("GameOver", { score: this.currentScore });
+    this.scene.start("GameOver", {
+      score: this.currentScore,
+      diedBy: this.diedBy,
+    });
   }
 
   async listenForSocketEvents() {
     // Send current state for new player
-    this.connection.socket.on("player join", () => {
+    this.socket.on("player join", () => {
       this.sendUpdate();
     });
 
     // Update state after disconnect
-    this.connection.socket.on("connect", () => {
+    this.socket.on("connect", () => {
       this.sendUpdate();
     });
 
-    this.connection.socket.on("player update", (player) => {
+    this.socket.on("player update", (player) => {
       console.debug("Received player update", player);
       if (!this.opponentSnakes.has(player.uuid)) {
         this.addNewOpponent(player);
@@ -188,7 +193,7 @@ export class Game extends Scene {
       this.opponentSnakes.get(player.uuid)?.updateFromState(player);
     });
 
-    this.connection.socket.on("player leave", (uuid) => {
+    this.socket.on("player leave", (uuid) => {
       console.debug("Received player leave", uuid);
 
       const snake = this.opponentSnakes.get(uuid);
@@ -203,7 +208,7 @@ export class Game extends Scene {
       this.opponentSnakes.delete(uuid);
     });
 
-    this.connection.socket.on("food", (data: Array<FoodLocation>) => {
+    this.socket.on("food", (data: Array<FoodLocation>) => {
       let existingFoodUUIDs: Array<string> = [];
 
       data.forEach((item) => {
@@ -230,7 +235,14 @@ export class Game extends Scene {
   async addNewOpponent(player: Player) {
     this.opponentSnakes.set(
       player.uuid,
-      new Snake(this, true, player.position.x, player.position.y, player.facing)
+      new Snake(
+        this,
+        true,
+        player.position.x,
+        player.position.y,
+        player.username,
+        player.facing
+      )
     );
   }
 
@@ -243,8 +255,9 @@ export class Game extends Scene {
       });
     });
 
-    const player = {
+    const player: Player = {
       uuid: this.uuid,
+      username: this.snake.name,
       score: this.currentScore,
       position: this.snake.headPosition,
       facing: this.snake.currentFacing,
@@ -256,6 +269,6 @@ export class Game extends Scene {
 
   async sendUpdate() {
     //console.log(this.socket.id);
-    this.connection.socket.emit("player update", this.createPlayerEvent());
+    this.socket.emit("player update", this.createPlayerEvent());
   }
 }

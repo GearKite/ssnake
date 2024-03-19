@@ -13,7 +13,7 @@ export class GameOver extends Scene {
     super("GameOver");
   }
 
-  create(data: { score: number; server: string }) {
+  create(data: { score: number; server: string; diedBy: string }) {
     this.cameras.main.setBackgroundColor(0x243c55);
 
     // Load main menu HTML
@@ -22,6 +22,7 @@ export class GameOver extends Scene {
       target: domElement,
       props: {
         score: data.score,
+        diedBy: data.diedBy,
         playAgain: () => {
           this.playAgain();
         },
@@ -46,7 +47,10 @@ export class GameOver extends Scene {
       reconnectionDelayMax: 10000,
     });
     socket.once("connect", () => {
-      this.scene.start("Game", { socket: socket });
+      this.scene.start("Game", {
+        socket: socket,
+        playerName: window.localStorage.getItem("playerName"),
+      });
     });
   }
 

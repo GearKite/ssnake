@@ -5,12 +5,17 @@
 
   export let playAgain: Function;
   export let mainMenu: Function;
+
+  export let diedBy: string = "";
 </script>
 
 <div class="center">
   <br />
   <h1 class="large-text">Game over!</h1>
   <h2 class="medium-text">Score: {score}</h2>
+  <h2 class="small-text">Killed by: {diedBy}</h2>
+  <br />
+
   <button
     on:click={() => {
       playAgain();
