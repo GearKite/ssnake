@@ -1,25 +1,36 @@
 import type { Game } from "../../game/scenes/Game";
 
-export interface FoodLocation {
+export interface FoodT {
   uuid: string;
   gridX: number;
   gridY: number;
+  foodType: "player" | "natural";
+  color: number;
 }
 
-export class Food extends Phaser.GameObjects.Rectangle implements FoodLocation {
+export class Food extends Phaser.GameObjects.Rectangle implements FoodT {
   game: Game;
 
-  uuid: string;
-  gridX: number;
-  gridY: number;
+  uuid: FoodT["uuid"];
+  gridX: FoodT["gridX"];
+  gridY: FoodT["gridY"];
+  foodType: FoodT["foodType"];
+  color: FoodT["color"];
 
-  constructor(scene: Game, uuid: string, x: number, y: number) {
+  constructor(
+    scene: Game,
+    uuid: FoodT["uuid"],
+    x: FoodT["gridX"],
+    y: FoodT["gridY"],
+    type: FoodT["foodType"],
+    color: FoodT["color"]
+  ) {
     super(scene, 0, 0);
 
     this.game = scene;
 
     this.setOrigin(0, 0);
-    this.setFillStyle(0xf1ef99);
+    this.setFillStyle(color);
     this.setSize(this.game.gridCellSize, this.game.gridCellSize);
 
     this.uuid = uuid;

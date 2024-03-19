@@ -1,12 +1,12 @@
 import { Server } from "socket.io";
 import { type Server as httpServerT } from "http";
-import type { Player, FoodLocation } from "./types";
+import type { Player, Food } from "./types";
 import { v4 as uuidv4 } from "uuid";
 
 export class Game {
   socket: Server;
   players: Map<string, Player> = new Map();
-  food: Map<string, FoodLocation> = new Map();
+  food: Map<string, Food> = new Map();
   socketIDToPlayerID: Map<string, string> = new Map();
 
   boardSizeX: number = 64;
@@ -57,6 +57,15 @@ export class Game {
 
         client.broadcast.emit("player leave", uuid);
 
+        const player = server.players.get(uuid);
+
+        player.body.forEach((position) => {
+          // Spawn only ~75% of the food
+          if (Math.random() > 0.75) return;
+
+          server.spawnFood(position.x, position.y, "player", player.color);
+        });
+
         server.players.delete(uuid);
 
         server.socketIDToPlayerID.delete(client.id);
@@ -66,11 +75,11 @@ export class Game {
         if (!this.food.has(uuid)) {
           return;
         }
-        this.food.delete(uuid);
 
-        if (!this.addFoodIfNeeded()) {
-          this.socket.emit("food", Array.from(this.food.values()));
-        }
+        // Replace natural food
+        if (this.food.get(uuid).foodType === "natural") this.spawnFood();
+
+        this.food.delete(uuid);
       });
 
       client.onAny((event) => {
@@ -84,16 +93,27 @@ export class Game {
       return false;
     }
 
+    this.spawnFood();
+
+    return true;
+  }
+
+  async spawnFood(
+    x: number = Math.floor(Math.random() * (this.boardSizeX - 1)),
+    y: number = Math.floor(Math.random() * (this.boardSizeY - 1)),
+    type: Food["foodType"] = "natural",
+    color: number = 0xf1ef99
+  ) {
     const uuid = uuidv4();
     this.food.set(uuid, {
       uuid: uuid,
-      gridX: Math.floor(Math.random() * (this.boardSizeX - 1)),
-      gridY: Math.floor(Math.random() * (this.boardSizeY - 1)),
+      gridX: x,
+      gridY: y,
+      foodType: type,
+      color: color,
     });
 
     this.socket.emit("food", Array.from(this.food.values()));
-
-    return true;
   }
 
   async loop() {

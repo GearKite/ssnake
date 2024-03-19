@@ -1,7 +1,7 @@
 import { EventBus } from "../EventBus";
 import { Scene } from "phaser";
 import { Snake } from "$lib/game/snake";
-import { Food, type FoodLocation } from "$lib/game/food";
+import { Food, type FoodT } from "$lib/game/food";
 import { JPTCCube } from "$lib/game/jptc";
 import { type Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
@@ -210,7 +210,7 @@ export class Game extends Scene {
       this.opponentSnakes.delete(uuid);
     });
 
-    this.socket.on("food", (data: Array<FoodLocation>) => {
+    this.socket.on("food", (data: Array<FoodT>) => {
       let existingFoodUUIDs: Array<string> = [];
 
       data.forEach((item) => {
@@ -218,7 +218,14 @@ export class Game extends Scene {
         if (!this.food.has(item.uuid)) {
           this.food.set(
             item.uuid,
-            new Food(this, item.uuid, item.gridX, item.gridY)
+            new Food(
+              this,
+              item.uuid,
+              item.gridX,
+              item.gridY,
+              item.foodType,
+              item.color
+            )
           );
         }
       });

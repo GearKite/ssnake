@@ -13,8 +13,10 @@ export interface Player {
   color: number;
 }
 
-export interface FoodLocation {
+export interface Food {
   uuid: string;
   gridX: number;
   gridY: number;
+  foodType: "player" | "natural";
+  color: number;
 }
