@@ -53,9 +53,8 @@ export class Snake {
     this.namePlate = scene.add.text(headRectangle.x, headRectangle.y, name, {
       fontFamily: "Arial Black",
       fontSize: 14,
-      color: "#00dd00",
-      stroke: "#000000",
-      strokeThickness: 1,
+      color: puppet ? "#dd0000" : "#00dd00",
+      strokeThickness: 0,
       align: "center",
     });
     this.namePlate.setOrigin(0);
