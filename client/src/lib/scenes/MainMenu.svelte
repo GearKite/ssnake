@@ -29,6 +29,8 @@
         type="text"
         id="input-username"
         name="username"
+        minlength="1"
+        maxlength="16"
         bind:value={playerName}
         on:change={() => {
           window.localStorage.setItem("playerName", playerName);
