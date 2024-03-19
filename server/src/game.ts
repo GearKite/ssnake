@@ -60,8 +60,8 @@ export class Game {
         const player = server.players.get(uuid);
 
         player.body.forEach((position) => {
-          // Spawn only ~75% of the food
-          if (Math.random() > 0.75) return;
+          // Spawn only ~50% of the food
+          if (Math.random() > 0.5) return;
 
           server.spawnFood(position.x, position.y, "player", player.color);
         });
