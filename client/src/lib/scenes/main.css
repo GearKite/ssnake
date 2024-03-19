@@ -1,0 +1,17 @@
+.center {
+  width: 1024px;
+  height: 768px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: column;
+}
+
+.large-text {
+  font-size: 72px;
+}
+
+.medium-text {
+  font-size: 48px;
+}

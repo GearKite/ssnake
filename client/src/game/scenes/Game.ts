@@ -18,7 +18,7 @@ export class Game extends Scene {
   hiScore: number;
 
   snake: Snake;
-  food: Map<string, Food> = new Map();
+  food: Map<string, Food>;
   jptc: JPTCCube;
 
   controls: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -28,8 +28,10 @@ export class Game extends Scene {
   gridCellsX: number;
   gridCellsY: number;
 
-  opponents: Map<typeof this.uuid, Player> = new Map();
-  opponentSnakes: Map<typeof this.uuid, Snake> = new Map();
+  opponents: Map<typeof this.uuid, Player>;
+  opponentSnakes: Map<typeof this.uuid, Snake>;
+
+  updateInterval: NodeJS.Timeout;
 
   constructor() {
     super("Game");
@@ -42,6 +44,10 @@ export class Game extends Scene {
     this.camera.zoom = 1;
 
     this.currentScore = 0;
+
+    this.food = new Map();
+    this.opponents = new Map();
+    this.opponentSnakes = new Map();
 
     // Load saved hi-score
     this.hiScore = parseInt(localStorage.getItem("hiscore")!);
@@ -100,7 +106,8 @@ export class Game extends Scene {
 
     connection.socket.emit("player join");
     this.sendUpdate();
-    setInterval(() => {
+
+    this.updateInterval = setInterval(() => {
       this.sendUpdate();
     }, 5000);
 
@@ -108,6 +115,13 @@ export class Game extends Scene {
 
     window.addEventListener("beforeunload", (e) => {
       connection.socket.emit("player leave");
+    });
+
+    this.events.once("shutdown", () => {
+      clearInterval(this.updateInterval);
+      this.connection.socket.emit("player leave");
+      this.connection.socket.disconnect();
+      this.connection.socket.off();
     });
   }
 
@@ -120,7 +134,6 @@ export class Game extends Scene {
       return;
     }
     if (!this.snake.isAlive) {
-      this.connection.socket.emit("player leave");
       this.changeScene();
       return;
     }

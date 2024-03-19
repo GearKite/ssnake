@@ -1,5 +1,7 @@
 import { EventBus } from "../EventBus";
 import { Scene } from "phaser";
+import { io } from "socket.io-client";
+import GameOverDOM from "$lib/scenes/GameOver.svelte";
 
 export class GameOver extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
@@ -11,62 +13,41 @@ export class GameOver extends Scene {
     super("GameOver");
   }
 
-  create(data: { score: number }) {
-    this.camera = this.cameras.main;
-    this.camera.setBackgroundColor(0xff0000);
+  create(data: { score: number; server: string }) {
+    this.cameras.main.setBackgroundColor(0x243c55);
 
-    this.background = this.add.image(512, 384, "background");
-    this.background.setAlpha(0.5);
+    // Load main menu HTML
+    let domElement = document.createElement("div");
+    new GameOverDOM({
+      target: domElement,
+      props: {
+        score: data.score,
+        playAgain: () => {
+          this.playAgain();
+        },
+        mainMenu: () => {
+          this.changeScene();
+        },
+      },
+    });
 
-    this.gameOverText = this.add
-      .text(512, 384, "Game Over", {
-        fontFamily: "Arial Black",
-        fontSize: 64,
-        color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 8,
-        align: "center",
-      })
-      .setOrigin(0.5)
-      .setDepth(100);
-
-    this.add
-      .text(512, 484, `Score: ${data.score}`, {
-        fontFamily: "Arial Black",
-        fontSize: 64,
-        color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 8,
-        align: "center",
-      })
-      .setOrigin(0.5)
-      .setDepth(100);
-
-    this.playButton = this.add
-      .text(512, 600, "Try again", {
-        fontFamily: "Arial Black",
-        fontSize: 38,
-        color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 3,
-        align: "center",
-        backgroundColor: "#FFF767",
-        padding: { x: 8, y: 8 },
-      })
-      .setOrigin(0.5)
-      .setDepth(100)
-      .setInteractive()
-      .on("pointerdown", () => {
-        this.scene.start("Game");
-      })
-      .on("pointerover", () => {
-        this.playButton.setStyle({ backgroundColor: "#FFFFBF" });
-      })
-      .on("pointerout", () => {
-        this.playButton.setStyle({ backgroundColor: "#FFF767" });
-      });
+    const dom = this.add.dom(0, 0).setElement(domElement);
+    dom.setOrigin(0, 0);
 
     EventBus.emit("current-scene-ready", this);
+  }
+
+  playAgain() {
+    const server =
+      window.localStorage.getItem("server") || window.location.host;
+
+    const socket = io(server, {
+      reconnectionAttempts: 5,
+      reconnectionDelayMax: 10000,
+    });
+    socket.once("connect", () => {
+      this.scene.start("Game", { socket: socket });
+    });
   }
 
   changeScene() {

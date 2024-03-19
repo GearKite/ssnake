@@ -1,4 +1,6 @@
 <script lang="ts">
+  import "./main.css";
+
   export let joinGame: Function;
   export let serverURI: string =
     window.localStorage.getItem("server") || window.location.host;
@@ -6,7 +8,7 @@
 
 <div class="center">
   <header>
-    <h1 class="title">SSNAKE</h1>
+    <h1 class="large-text">SSNAKE</h1>
   </header>
 
   <main>
@@ -40,19 +42,3 @@
   <br />
   <footer></footer>
 </div>
-
-<style>
-  .center {
-    width: 1024px;
-    height: 768px;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-  }
-
-  .title {
-    font-size: 72px;
-  }
-</style>
