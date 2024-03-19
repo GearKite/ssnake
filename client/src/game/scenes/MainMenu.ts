@@ -24,7 +24,7 @@ export class MainMenu extends Scene {
   }
 
   join_game() {
-    const socket = io("ws://localhost:3000");
+    const socket = io();
     socket.once("connect", () => {
       this.scene.start("Game", { socket: socket });
     });

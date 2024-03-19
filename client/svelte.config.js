@@ -11,9 +11,10 @@ const config = {
 			precompress: false,
 			fallback: 'index.html'
 		}),
-		paths: {
-			base: process.env.NODE_ENV === "production" ? "/ssnake" : "",
-		},
+		// Path for GitHub pages
+		//paths: {
+		//	base: process.env.NODE_ENV === "production" ? "/ssnake" : "",
+		//},
 	}
 };
 

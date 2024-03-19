@@ -9,7 +9,7 @@ const http = createServer(app);
 
 new Game(http);
 
-app.use(express.static("index"));
+app.use(express.static("public"));
 
 http.listen(port, () => {
   console.log(`Server listening on port ${port}`);
