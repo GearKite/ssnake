@@ -188,14 +188,16 @@ export class Snake {
   }
 
   checkIfFoodEaten() {
-    let hit =
-      this.headPosition.x === this.game.food.gridX &&
-      this.headPosition.y === this.game.food.gridY;
+    this.game.food.forEach((food, uuid) => {
+      let hit =
+        this.headPosition.x === food.gridX &&
+        this.headPosition.y === food.gridY;
 
-    if (hit) {
-      this.grow();
-      this.game.food.eatFood();
-    }
+      if (hit) {
+        this.grow();
+        food.eatFood();
+      }
+    });
   }
 
   sendUpdate() {

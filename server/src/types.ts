@@ -10,3 +10,9 @@ export interface Player {
   score: number;
   body: Array<Position>;
 }
+
+export interface FoodLocation {
+  uuid: string;
+  gridX: number;
+  gridY: number;
+}

@@ -1,7 +1,7 @@
 import { EventBus } from "../EventBus";
 import { Scene } from "phaser";
 import { Snake } from "$lib/game/snake";
-import { Food } from "$lib/game/food";
+import { Food, type FoodLocation } from "$lib/game/food";
 import { JPTCCube } from "$lib/game/jptc";
 import { type Socket } from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
@@ -18,7 +18,7 @@ export class Game extends Scene {
   hiScore: number;
 
   snake: Snake;
-  food: Food;
+  food: Map<string, Food> = new Map();
   jptc: JPTCCube;
 
   controls: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -83,8 +83,7 @@ export class Game extends Scene {
       .setOrigin(0, 0.5)
       .setDepth(100);
 
-    // Create food and snake
-    this.food = new Food(this);
+    // Create our snake
     this.snake = new Snake(
       this,
       false,
@@ -189,6 +188,29 @@ export class Game extends Scene {
 
       this.opponents.delete(uuid);
       this.opponentSnakes.delete(uuid);
+    });
+
+    this.connection.socket.on("food", (data: Array<FoodLocation>) => {
+      let existingFoodUUIDs: Array<string> = [];
+
+      data.forEach((item) => {
+        existingFoodUUIDs.push(item.uuid);
+        if (!this.food.has(item.uuid)) {
+          this.food.set(
+            item.uuid,
+            new Food(this, item.uuid, item.gridX, item.gridY)
+          );
+        }
+      });
+
+      // Remove non-existant food
+      Array.from(this.food.keys()).forEach((uuid) => {
+        if (existingFoodUUIDs.includes(uuid)) {
+          return;
+        }
+        this.food.get(uuid)!.destroy();
+        this.food.delete(uuid);
+      });
     });
   }
 

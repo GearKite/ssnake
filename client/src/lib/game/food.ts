@@ -1,11 +1,19 @@
 import type { Game } from "../../game/scenes/Game";
 
-export class Food extends Phaser.GameObjects.Rectangle {
+export interface FoodLocation {
+  uuid: string;
+  gridX: number;
+  gridY: number;
+}
+
+export class Food extends Phaser.GameObjects.Rectangle implements FoodLocation {
   game: Game;
+
+  uuid: string;
   gridX: number;
   gridY: number;
 
-  constructor(scene: Game) {
+  constructor(scene: Game, uuid: string, x: number, y: number) {
     super(scene, 0, 0);
 
     this.game = scene;
@@ -14,7 +22,14 @@ export class Food extends Phaser.GameObjects.Rectangle {
     this.setFillStyle(0xf1ef99);
     this.setSize(this.game.gridCellSize, this.game.gridCellSize);
 
-    this.moveFood();
+    this.uuid = uuid;
+    this.gridX = x;
+    this.gridY = y;
+
+    this.setPosition(
+      this.gridX * this.game.gridCellSize,
+      this.gridY * this.game.gridCellSize + this.game.scoreBarHeight
+    );
 
     scene.children.add(this);
   }
@@ -30,8 +45,9 @@ export class Food extends Phaser.GameObjects.Rectangle {
   }
 
   eatFood() {
+    this.game.connection.socket.emit("food eat", this.uuid);
     this.game.currentScore += 1;
     this.game.updateScore();
-    this.moveFood();
+    this.destroy(true);
   }
 }

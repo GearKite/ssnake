@@ -9,9 +9,7 @@ const http = createServer(app);
 
 new Game(http);
 
-app.get("/", (req, res) => {
-  res.send("SSNAKE multiplayer server");
-});
+app.use(express.static("index"));
 
 http.listen(port, () => {
   console.log(`Server listening on port ${port}`);
