@@ -80,6 +80,8 @@ export class Game {
         if (this.food.get(uuid).foodType === "natural") this.spawnFood();
 
         this.food.delete(uuid);
+
+        this.socket.emit("food", Array.from(this.food.values()));
       });
 
       client.onAny((event) => {
@@ -94,6 +96,8 @@ export class Game {
     }
 
     this.spawnFood();
+
+    this.socket.emit("food", Array.from(this.food.values()));
 
     return true;
   }
@@ -112,8 +116,6 @@ export class Game {
       foodType: type,
       color: color,
     });
-
-    this.socket.emit("food", Array.from(this.food.values()));
   }
 
   async loop() {
