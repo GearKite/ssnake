@@ -2,14 +2,26 @@
 
 This is a simple snake game made with Phaser and SvelteKit, and an example of _anything that can be written in JavaScript will eventually be written in JavaScript_, but in this case it's actually TypeScript :D
 
-## Requirements
+## Installation
 
-[Node.js](https://nodejs.org) is required to install dependencies and run scripts via `npm`.
+### Docker
 
-## Available Commands
+`docker pull ghcr.io/gearkite/ssnake:main`  
+`docker run -p 3000:3000 ssnake`
 
-| Command         | Description                                     |
-| --------------- | ----------------------------------------------- |
-| `npm install`   | Install project dependencies                    |
-| `npm run dev`   | Launch a development web server                 |
-| `npm run build` | Create a production build in the `build` folder |
+### Source
+
+1. Install [Node.js](https://nodejs.org)
+
+2. Install dependencies  
+   `cd client && npm install && cd ..`  
+   `cd server && npm install && cd ..`
+
+3. Run the build script  
+   `bash ./scripts/build.sh`
+
+4. Go into `server`  
+   `cd ./server`
+
+5. `Start the server`  
+   `npm run start`
