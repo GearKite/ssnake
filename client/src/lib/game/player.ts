@@ -12,10 +12,10 @@ export enum SnakeFacing {
 
 export interface Player {
   uuid: string;
-  username: string;
-  position: Position;
-  score: number;
-  body: Array<Position>;
-  facing: SnakeFacing;
-  color: number;
+  username?: string;
+  position?: Position;
+  score?: number;
+  body?: Array<Position>;
+  facing?: SnakeFacing;
+  color?: number;
 }

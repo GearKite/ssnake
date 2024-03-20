@@ -186,13 +186,18 @@ export class Game extends Scene {
       this.sendUpdate();
     });
 
-    this.socket.on("player update", (player) => {
-      console.debug("Received player update", player);
-      if (!this.opponentSnakes.has(player.uuid)) {
-        this.addNewOpponent(player);
+    this.socket.on("player update", (player: Player) => {
+      if (player.uuid === this.uuid) {
+        // Update our own player
+        this.snake.updateFromState(player);
+        this.currentScore = player.score || this.currentScore;
+      } else {
+        if (!this.opponentSnakes.has(player.uuid)) {
+          this.addNewOpponent(player);
+        }
+        this.opponents.set(player.uuid, player);
+        this.opponentSnakes.get(player.uuid)?.updateFromState(player);
       }
-      this.opponents.set(player.uuid, player);
-      this.opponentSnakes.get(player.uuid)?.updateFromState(player);
     });
 
     this.socket.on("player leave", (uuid) => {
@@ -242,6 +247,7 @@ export class Game extends Scene {
   }
 
   async addNewOpponent(player: Player) {
+    if (!player.position || !player.username || !player.color) return;
     this.opponentSnakes.set(
       player.uuid,
       new Snake(

@@ -254,23 +254,38 @@ export class Snake {
       return;
     }
 
-    this.currentFacing = state.facing;
-    this.color = state.color;
+    // Replace certain attributes, if given, otherwise leave unchanged
+    this.currentFacing = state.facing || this.currentFacing;
+    this.color = state.color || this.color;
+    this.name = state.username || this.name;
 
-    this.headPosition.setTo(state.position.x, state.position.y);
+    if (state.position !== undefined)
+      this.headPosition.setTo(state.position.x, state.position.y);
 
-    state.body.forEach((position, index) => {
-      if (index >= this.body.getLength()) {
-        this.grow(position.x, position.y);
+    if (state.body !== undefined) {
+      if (state.body.length > this.body.getLength()) {
+        // Add more body segments
+        state.body.forEach((position, index) => {
+          if (index >= this.body.getLength()) {
+            this.grow(position.x, position.y);
+          }
+        });
+      } else if (state.body.length < this.body.getLength()) {
+        // Remove body segments
+        this.body.getChildren().forEach((child, index) => {
+          if (index > state.body!.length) {
+            child.destroy(true);
+          }
+        });
       }
-    });
 
-    const body: Array<any> = this.body.getChildren();
+      const body: Array<any> = this.body.getChildren();
 
-    state.body.forEach((position, index) => {
-      body[index].setX(position.x * this.game.gridCellSize);
-      body[index].setY(position.y * this.game.gridCellSize);
-    });
+      state.body.forEach((position, index) => {
+        body[index].setX(position.x * this.game.gridCellSize);
+        body[index].setY(position.y * this.game.gridCellSize);
+      });
+    }
   }
 
   destroy() {
