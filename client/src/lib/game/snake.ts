@@ -71,9 +71,7 @@ export class Snake {
   }
 
   async move(delta: number) {
-    if (!this.isAlive) {
-      return;
-    }
+    if (!this.isAlive) return;
     if (this.timeUntilNextMove - delta > 0) {
       this.timeUntilNextMove = this.timeUntilNextMove - delta;
       return;
@@ -122,20 +120,12 @@ export class Snake {
     // Update tail
     Phaser.Actions.ShiftPosition(this.body.getChildren(), x, y, 1, this.tail);
 
-    if (this.currentFacing === SnakeFacing.left)
-      this.namePlate.setPosition(x - this.namePlate.width / 2 + 8, y - 18);
-    else if (this.currentFacing === SnakeFacing.right)
-      this.namePlate.setPosition(x - this.namePlate.width / 2 + 8, y - 18);
-    else if (this.currentFacing === SnakeFacing.up)
-      this.namePlate.setPosition(x - this.namePlate.width / 2 + 8, y - 18);
-    else if (this.currentFacing === SnakeFacing.down)
-      this.namePlate.setPosition(x - this.namePlate.width / 2 + 8, y + 14);
+    this.updateNametag(x, y);
 
-    if (this.puppet) {
-      return true;
-    }
+    if (this.puppet) return;
 
     this.checkIfFoodEaten();
+
     return await this.checkIfSnakeHit();
   }
   faceLeft() {
@@ -273,19 +263,35 @@ export class Snake {
       } else if (state.body.length < this.body.getLength()) {
         // Remove body segments
         this.body.getChildren().forEach((child, index) => {
-          if (index > state.body!.length) {
+          if (index >= state.body!.length) {
             child.destroy(true);
           }
         });
       }
 
-      const body: Array<any> = this.body.getChildren();
+      // Only update body positions for puppets
+      if (this.puppet) {
+        const body: Array<any> = this.body.getChildren();
 
-      state.body.forEach((position, index) => {
-        body[index].setX(position.x * this.game.gridCellSize);
-        body[index].setY(position.y * this.game.gridCellSize);
-      });
+        state.body.forEach((position, index) => {
+          body[index].setX(position.x * this.game.gridCellSize);
+          body[index].setY(
+            position.y * this.game.gridCellSize + this.game.scoreBarHeight
+          );
+        });
+      }
     }
+  }
+
+  async updateNametag(x: number, y: number) {
+    if (this.currentFacing === SnakeFacing.left)
+      this.namePlate.setPosition(x - this.namePlate.width / 2 + 8, y - 18);
+    else if (this.currentFacing === SnakeFacing.right)
+      this.namePlate.setPosition(x - this.namePlate.width / 2 + 8, y - 18);
+    else if (this.currentFacing === SnakeFacing.up)
+      this.namePlate.setPosition(x - this.namePlate.width / 2 + 8, y - 18);
+    else if (this.currentFacing === SnakeFacing.down)
+      this.namePlate.setPosition(x - this.namePlate.width / 2 + 8, y + 14);
   }
 
   destroy() {

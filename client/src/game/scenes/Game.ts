@@ -34,6 +34,7 @@ export class Game extends Scene {
   opponentSnakes: Map<typeof this.uuid, Snake>;
 
   updateInterval: NodeJS.Timeout;
+  previousUpdate: Player;
 
   constructor() {
     super("Game");
@@ -109,10 +110,10 @@ export class Game extends Scene {
     this.listenForSocketEvents();
 
     this.socket.emit("player join");
-    this.sendUpdate();
+    this.sendUpdate(true);
 
     this.updateInterval = setInterval(() => {
-      this.sendUpdate();
+      this.sendUpdate(true);
     }, 5000);
 
     EventBus.emit("current-scene-ready", this);
@@ -178,7 +179,7 @@ export class Game extends Scene {
   async listenForSocketEvents() {
     // Send current state for new player
     this.socket.on("player join", () => {
-      this.sendUpdate();
+      this.sendUpdate(true);
     });
 
     // Update state after disconnect
@@ -267,7 +268,7 @@ export class Game extends Scene {
     this.snake.body.getChildren().forEach((child: any) => {
       body.push({
         x: child.x / this.gridCellSize,
-        y: child.y / this.gridCellSize,
+        y: (child.y - this.scoreBarHeight) / this.gridCellSize,
       });
     });
 
@@ -284,8 +285,29 @@ export class Game extends Scene {
     return player;
   }
 
-  async sendUpdate() {
-    //console.log(this.socket.id);
-    this.socket.emit("player update", this.createPlayerEvent());
+  async sendUpdate(full: boolean = false) {
+    const newState = this.createPlayerEvent();
+    let updated: Player;
+
+    if (!full) {
+      updated = {
+        ...getChangedValues(this.previousUpdate, newState),
+        ...{ uuid: this.uuid, position: newState.position }, // Always send UUID and position
+      };
+    } else {
+      updated = newState;
+    }
+    this.previousUpdate = newState;
+
+    this.socket.emit("player update", updated);
   }
+}
+
+function getChangedValues(obj1: Object = {}, obj2: Object = {}) {
+  return Object.entries(obj2).reduce((acc, [key, value]) => {
+    if (obj1[key] !== value) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {});
 }

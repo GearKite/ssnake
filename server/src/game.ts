@@ -15,10 +15,6 @@ export class Game {
   constructor(httpServer: httpServerT) {
     this.socket = new Server(httpServer);
 
-    setInterval(() => {
-      this.loop();
-    }, 1000);
-
     this.socket.on("connection", (client) => {
       console.log(
         `Client ${client.id} connected from ${client.handshake.address}`
@@ -69,7 +65,6 @@ export class Game {
         client.broadcast.emit("food", Array.from(server.food.values()));
 
         server.players.delete(uuid);
-
         server.socketIDToPlayerID.delete(client.id);
       }
 
@@ -90,6 +85,15 @@ export class Game {
         console.debug(`Client ${client.id} sent event: ${event}`);
       });
     });
+
+    setInterval(() => {
+      this.loop();
+    }, 1000);
+
+    // Shrink a player every 60 seconds
+    setInterval(() => {
+      this.shrinkRandomPlayer();
+    }, 60 * 1000);
   }
 
   async addFoodIfNeeded() {
@@ -121,6 +125,32 @@ export class Game {
   }
 
   async loop() {
-    await this.addFoodIfNeeded();
+    this.addFoodIfNeeded();
+  }
+
+  async shrinkRandomPlayer() {
+    const player = this.getRandomPlayer();
+
+    if (!player) return;
+
+    if (player.body.length < 2) return;
+
+    player.body.pop();
+    const changed: Player = { uuid: player.uuid, body: player.body };
+    const updated: Player = { ...player, ...changed };
+
+    this.players.set(player.uuid, updated);
+
+    this.socket.emit("player update", changed);
+
+    if (Math.random() > 0.5)
+      this.spawnFood(undefined, undefined, "player", player.color);
+  }
+
+  getRandomPlayer(): Player | undefined {
+    const arr = Array.from(this.players.values());
+    const index = Math.floor(Math.random() * arr.length);
+
+    return arr[index];
   }
 }
