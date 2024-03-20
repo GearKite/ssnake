@@ -245,6 +245,16 @@ export class Game extends Scene {
         this.food.delete(uuid);
       });
     });
+
+    this.socket.io.on("reconnect_attempt", (attempt: number) => {
+      console.log(attempt);
+      if (attempt === 5) {
+        this.socket.io.once("reconnect_failed", () => {
+          this.diedBy = "Lost connection to the server";
+          this.changeScene();
+        });
+      }
+    });
   }
 
   async addNewOpponent(player: Player) {
