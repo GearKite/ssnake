@@ -114,7 +114,7 @@ export class Game extends Scene {
 
     this.updateInterval = setInterval(() => {
       this.sendUpdate(true);
-    }, 5000);
+    }, 1000);
 
     EventBus.emit("current-scene-ready", this);
 

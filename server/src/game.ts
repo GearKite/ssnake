@@ -12,6 +12,8 @@ export class Game {
   boardSizeX: number = 64;
   boardSizeY: number = 46;
 
+  speed: number = 8;
+
   constructor(httpServer: httpServerT) {
     this.socket = new Server(httpServer);
 
@@ -28,8 +30,16 @@ export class Game {
 
       client.on("player update", (player: Player) => {
         this.socketIDToPlayerID.set(client.id, player.uuid);
-        this.players.set(player.uuid, player);
-        client.broadcast.emit("player update", player);
+        if (this.validatePlayerUpdate(player)) {
+          this.players.set(player.uuid, {
+            ...this.players.get(player.uuid),
+            ...player,
+          });
+          client.broadcast.emit("player update", player);
+        } else {
+          console.log("Invalid player update for:", player.uuid);
+          client.emit("player update", this.players.get(player.uuid));
+        }
       });
 
       // Client gracefully exits, sending a request
@@ -94,6 +104,10 @@ export class Game {
     setInterval(() => {
       this.shrinkRandomPlayer();
     }, 60 * 1000);
+
+    setInterval(() => {
+      this.movePlayers();
+    }, 1000 / this.speed);
   }
 
   async addFoodIfNeeded() {
@@ -152,5 +166,84 @@ export class Game {
     const index = Math.floor(Math.random() * arr.length);
 
     return arr[index];
+  }
+
+  async movePlayers() {
+    this.players.forEach((player: Player, uuid: string) => {
+      const updated = this.movePlayer(player);
+      this.players.set(uuid, updated);
+    });
+  }
+
+  movePlayer(player: Player) {
+    /* eslint-disable indent */
+    switch (player.facing) {
+      case "left":
+        player.position.x =
+          (player.position.x + this.boardSizeX - 1) % (this.boardSizeX - 0);
+        break;
+      case "right":
+        player.position.x =
+          (player.position.x + this.boardSizeX + 1) % (this.boardSizeX - 0);
+        break;
+      case "up":
+        player.position.y =
+          (player.position.y + this.boardSizeY - 1) % (this.boardSizeY - 0);
+        break;
+      case "down":
+        player.position.y =
+          (player.position.y + this.boardSizeY + 1) % (this.boardSizeY - 0);
+        break;
+    }
+    /* eslint-enable indent */
+    return player;
+  }
+
+  checkCollisions(player: Player) {
+    if (!player.position) return false;
+
+    const hitOpponent = !Array.from(this.players.values()).every((opponent) => {
+      if (opponent.uuid === player.uuid) return true;
+
+      return opponent.body.every((segment) => {
+        return !(
+          player.position.x === segment.x && player.position.y === segment.y
+        );
+      });
+    });
+
+    return hitOpponent;
+  }
+
+  validatePlayerUpdate(received: Player): boolean {
+    if (!this.players.has(received.uuid)) return true;
+
+    const previous: Player = this.players.get(received.uuid);
+
+    if (received.score && received.score > previous.score + 1) return false;
+
+    if (received.body && received.body.length > previous.body.length + 1)
+      return false;
+
+    if (received.position) {
+      if (this.calculateDistance(received.position, previous.position) >= 4) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  calculateDistance(p1: Player["position"], p2: Player["position"]) {
+    // Calculate the difference in positions
+    let dx = Math.abs(p1.x - p2.x);
+    let dy = Math.abs(p1.y - p2.y);
+
+    // Consider wrapping around the game
+    dx = Math.min(dx, this.boardSizeX - dx);
+    dy = Math.min(dy, this.boardSizeY - dy);
+
+    // Apply the Pythagorean theorem to find the distance
+    return Math.sqrt(dx * dx + dy * dy);
   }
 }
