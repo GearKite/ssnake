@@ -1,6 +1,7 @@
 import express from "express";
 import { createServer } from "http";
 import { Game } from "./game";
+import { logger } from "./logger";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,5 +21,5 @@ app.use(function (req, res, next) {
 app.use(express.static("public"));
 
 http.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  logger.info(`Server listening on port ${port}`);
 });

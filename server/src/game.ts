@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { type Server as httpServerT } from "http";
 import type { Player, Food } from "./types";
 import { v4 as uuidv4 } from "uuid";
+import { logger } from "./logger";
 
 export class Game {
   socket: Server;
@@ -18,7 +19,7 @@ export class Game {
     this.socket = new Server(httpServer);
 
     this.socket.on("connection", (client) => {
-      console.log(
+      logger.info(
         `Client ${client.id} connected from ${client.handshake.address}`
       );
       // Broadcast all player updates to every other player
@@ -29,6 +30,11 @@ export class Game {
       });
 
       client.on("player update", (player: Player) => {
+        if (!this.players.has(player.uuid))
+          logger.info(
+            `New player from ${client.id} joined as ${player.username}`
+          );
+
         this.socketIDToPlayerID.set(client.id, player.uuid);
         if (this.validatePlayerUpdate(player)) {
           this.players.set(player.uuid, {
@@ -37,7 +43,7 @@ export class Game {
           });
           client.broadcast.emit("player update", player);
         } else {
-          console.log("Invalid player update for:", player.uuid);
+          logger.info(`Invalid player update for: ${player.uuid}`);
           client.emit("player update", this.players.get(player.uuid));
         }
       });
@@ -57,7 +63,7 @@ export class Game {
           return;
         }
 
-        console.log(`Client ${client.id} left`);
+        logger.info(`Client ${client.id} left`);
 
         const uuid = server.socketIDToPlayerID.get(client.id);
 
@@ -92,7 +98,7 @@ export class Game {
       });
 
       client.onAny((event) => {
-        console.debug(`Client ${client.id} sent event: ${event}`);
+        logger.debug(`Client ${client.id} sent event: ${event}`);
       });
     });
 
